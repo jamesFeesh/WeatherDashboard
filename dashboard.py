@@ -1,53 +1,44 @@
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
 import os
-
-# Check if weather_data.csv exists, if not, generate it
-if not os.path.exists("weather_data.csv"):
-    import subprocess
-    # Run fetch_weather.py to generate the data
-    subprocess.run(["python", "fetch_weather.py"])
+import subprocess
+import pandas as pd
+import streamlit as st
 
 # File paths
 daily_data_file = "weather_data.csv"
-hottest_capitals_file = "hottest_capitals.csv"
-coldest_capitals_file = "coldest_capitals.csv"
 
-# Load data
-daily_data = pd.read_csv(daily_data_file)
-hottest_capitals = pd.read_csv(hottest_capitals_file)
-coldest_capitals = pd.read_csv(coldest_capitals_file)
+# Check if the file exists
+if not os.path.exists(daily_data_file):
+    # Run fetch_weather.py to generate the data
+    try:
+        st.write("Generating weather data file...")
+        subprocess.run(["python", "fetch_weather.py"], check=True)
+        st.write("Weather data file generated successfully.")
+    except subprocess.CalledProcessError as e:
+        st.error("Failed to generate weather data. Please check fetch_weather.py.")
+        st.stop()
 
-# Streamlit App
-st.title("Global Capitals Weather Dashboard")
+# Load the weather data
+try:
+    daily_data = pd.read_csv(daily_data_file)
+except Exception as e:
+    st.error(f"Error reading weather data: {e}")
+    st.stop()
 
-# Display daily weather data
-st.subheader("Weather Data for All Capitals")
-st.dataframe(daily_data)
+# Dashboard Title
+st.title("Weather Dashboard")
 
-# Display hottest capitals
-st.subheader("Top 5 Hottest Capitals Today")
-st.dataframe(hottest_capitals)
+# Hottest Capitals
+st.subheader("Top 5 Hottest Capitals")
+try:
+    hottest = daily_data.sort_values("Temperature", ascending=False).head(5)
+    st.write(hottest)
+except Exception as e:
+    st.error(f"Error processing hottest capitals: {e}")
 
-# Display coldest capitals
-st.subheader("Top 5 Coldest Capitals Today")
-st.dataframe(coldest_capitals)
-
-# Visualisation for hottest capitals
-st.subheader("Top 5 Hottest Capitals - Temperature Visualization")
-plt.figure(figsize=(10, 5))
-plt.bar(hottest_capitals['City'], hottest_capitals['Temperature'], color='orange')
-plt.xlabel("City")
-plt.ylabel("Temperature (°C)")
-plt.title("Top 5 Hottest Capitals")
-st.pyplot(plt)
-
-# Visualisation for coldest capitals
-st.subheader("Top 5 Coldest Capitals - Temperature Visualization")
-plt.figure(figsize=(10, 5))
-plt.bar(coldest_capitals['City'], coldest_capitals['Temperature'], color='blue')
-plt.xlabel("City")
-plt.ylabel("Temperature (°C)")
-plt.title("Top 5 Coldest Capitals")
-st.pyplot(plt)
+# Coldest Capitals
+st.subheader("Top 5 Coldest Capitals")
+try:
+    coldest = daily_data.sort_values("Temperature", ascending=True).head(5)
+    st.write(coldest)
+except Exception as e:
+    st.error(f"Error processing coldest capitals: {e}")
