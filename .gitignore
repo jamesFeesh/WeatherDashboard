@@ -1,0 +1,13 @@
+# Virtual environment
+env/
+
+# Cache files
+__pycache__/
+
+# Data files that are auto-generated
+weather_data.csv
+hottest_capitals.csv
+coldest_capitals.csv
+
+# Sensitive information
+.env
