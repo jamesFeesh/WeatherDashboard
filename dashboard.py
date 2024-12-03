@@ -1,6 +1,13 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
+
+# Check if weather_data.csv exists, if not, generate it
+if not os.path.exists("weather_data.csv"):
+    import subprocess
+    # Run fetch_weather.py to generate the data
+    subprocess.run(["python", "fetch_weather.py"])
 
 # File paths
 daily_data_file = "weather_data.csv"
